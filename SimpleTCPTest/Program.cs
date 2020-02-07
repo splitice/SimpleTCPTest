@@ -11,8 +11,19 @@ namespace SimpleTCPTest
 {
     class Program
     {
+        private static String mode = "count";
+        private static int i = 0;
+
         static void Main(string[] args)
         {
+            if (args.Length >= 1)
+            {
+                if (args[0] == "long")
+                {
+                    mode = args[0];
+                }
+            }
+
             TcpListener listener = new TcpListener(8888);
             listener.Start();
             while (true)
@@ -33,7 +44,6 @@ namespace SimpleTCPTest
                 var stream = client.GetStream();
                 StreamReader sr = new StreamReader(stream);
                 StreamWriter sw = new StreamWriter(stream);
-                int i = 0;
                 DateTime last = DateTime.Now;
 
                 while (client.Connected)
@@ -48,7 +58,7 @@ namespace SimpleTCPTest
                     Thread.Sleep(100);
                     if (DateTime.Now - last > TimeSpan.FromSeconds(1))
                     {
-                        sw.WriteLine(++i);
+                        sw.WriteLine(GetTransmission());
                         last = DateTime.Now;
                     }
 
@@ -63,6 +73,21 @@ namespace SimpleTCPTest
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        private static string GetTransmission()
+        {
+            if (mode == "count")
+            {
+                return (++i).ToString();
+            }
+
+            if (mode == "long")
+            {
+                return "".PadLeft(i++, 'X');
+            }
+
+            return "unknown";
         }
     }
 }
