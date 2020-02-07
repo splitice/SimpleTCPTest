@@ -12,7 +12,8 @@ namespace SimpleTCPTest
     class Program
     {
         private static String mode = "count";
-        private static int i = 0;
+        private int i = 0;
+        private TcpClient _client;
 
         static void Main(string[] args)
         {
@@ -30,23 +31,28 @@ namespace SimpleTCPTest
             {
                 var client = listener.AcceptTcpClient();
                 Console.WriteLine("Accepting new TCP connection");
-
-                Thread thread = new Thread(ClientMain);
-                thread.Start(client);
+                new Program(client);
             } 
         }
 
-        private static void ClientMain(object obj)
+        Program(TcpClient client)
+        {
+            _client = client;
+
+            Thread thread = new Thread(ClientMain);
+            thread.Start();
+        }
+
+        private void ClientMain()
         {
             try
             {
-                TcpClient client = obj as TcpClient;
-                var stream = client.GetStream();
+                var stream = _client.GetStream();
                 StreamReader sr = new StreamReader(stream);
                 StreamWriter sw = new StreamWriter(stream);
                 DateTime last = DateTime.Now;
 
-                while (client.Connected)
+                while (_client.Connected)
                 {
                     if (stream.DataAvailable)
                     {
@@ -75,7 +81,7 @@ namespace SimpleTCPTest
             }
         }
 
-        private static string GetTransmission()
+        private string GetTransmission()
         {
             if (mode == "count")
             {
